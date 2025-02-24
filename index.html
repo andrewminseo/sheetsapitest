@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4285F4;
+            --secondary: #34A853;
+            --warning: #FBBC05;
+            --danger: #EA4335;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            margin: 0;
+            text-align: center;
+        }
+        
+        .control-panel {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .control-panel button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-panel button:hover {
+            background-color: #3367d6;
+        }
+        
+        .control-panel button.warning {
+            background-color: var(--warning);
+        }
+        
+        .control-panel button.warning:hover {
+            background-color: #e8ac00;
+        }
+        
+        .control-panel button.success {
+            background-color: var(--secondary);
+        }
+        
+        .control-panel button.success:hover {
+            background-color: #2d964a;
+        }
+        
+        .search-box {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            background-color: var(--light);
+            border-radius: 4px;
+            padding: 5px 10px;
+        }
+        
+        .search-box input {
+            flex-grow: 1;
+            border: none;
+            padding: 5px;
+            background-color: transparent;
+            outline: none;
+        }
+        
+        .search-box i {
+            color: #666;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        thead {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .status.available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status.low {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .action-buttons button {
+            padding: 6px 12px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: var(--light);
+            transition: background-color 0.3s;
+        }
+        
+        .action-buttons button:hover {
+            background-color: #e2e6ea;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .form-actions button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-cancel {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        
+        .btn-save {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Inventory Management System</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="control-panel">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search" placeholder="Search inventory...">
+            </div>
+            <button id="add-item" class="success">
+                <i class="fas fa-plus"></i> Add New Item
+            </button>
+            <button id="refresh-data">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+        </div>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <div class="loading-indicator" id="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading inventory data...</p>
+        </div>
+        
+        <table id="inventory-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Last Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="inventory-body">
+                <!-- Inventory data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Edit/Add Item Modal -->
+    <div id="item-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Add New Item</h2>
+            <form id="item-form">
+                <input type="hidden" id="item-id">
+                <div class="form-group">
+                    <label for="item-name">Item Name</label>
+                    <input type="text" id="item-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="item-category">Category</label>
+                    <input type="text" id="item-category" required>
+                </div>
+                <div class="form-group">
+                    <label for="item-quantity">Quantity</label>
+                    <input type="number" id="item-quantity" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="item-status">Status</label>
+                    <select id="item-status" required>
+                        <option value="Available">Available</option>
+                        <option value="Low Stock">Low Stock</option>
+                        <option value="Unavailable">Unavailable</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancel-button">Cancel</button>
+                    <button type="submit" class="btn-save">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // Your Google Apps Script Web App URL will go here
+        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyyGxq35Gq1NzDOuBLNlXb2x52r2YOPDRWnO-a_8AK3OjwY2d8H2dCICCZc_Dl1QSI/exec';
+        
+        // No need to initialize the Google API client
+        function initClient() {
+            // Just load the data directly
+            loadInventoryData();
+        }
+        
+        // We don't need to load the Google API client
+        function loadGoogleApi() {
+            // Just call initClient directly
+            initClient();
+        }
+        
+        // Load inventory data from Apps Script Web App
+        function loadInventoryData() {
+            showLoading(true);
+            fetch(`${WEBAPP_URL}?action=getItems`)
+                .then(response => response.json())
+                .then(data => {
+                    updateInventoryTable(data.items);
+                    showLoading(false);
+                })
+                .catch(error => {
+                    showError('Error loading inventory data: ' + error.message);
+                    showLoading(false);
+                });
+        }
+        
+        // Update the inventory table with data
+        function updateInventoryTable(items) {
+            const tableBody = document.getElementById('inventory-body');
+            tableBody.innerHTML = '';
+            
+            if (!items || items.length === 0) {
+                showError('No data found in the spreadsheet.');
+                return;
+            }
+            
+            // Process each item
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (!item.ID) continue; // Skip items with no ID
+                
+                const id = item.ID || '';
+                const name = item['Item Name'] || '';
+                const category = item.Category || '';
+                const quantity = item.Quantity || '0';
+                const status = item.Status || 'Unavailable';
+                const lastUpdated = item['Last Updated'] || '';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${id}</td>
+                    <td>${name}</td>
+                    <td>${category}</td>
+                    <td>${quantity}</td>
+                    <td><span class="status ${status.toLowerCase().replace(/\s+/g, '')}">${status}</span></td>
+                    <td>${lastUpdated}</td>
+                    <td class="action-buttons">
+                        <button onclick="editItem('${id}', '${name}', '${category}', ${quantity}, '${status}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            }
+        }
+        
+        // Edit an existing item
+        function editItem(id, name, category, quantity, status) {
+            document.getElementById('modal-title').textContent = 'Edit Item';
+            document.getElementById('item-id').value = id;
+            document.getElementById('item-name').value = name;
+            document.getElementById('item-category').value = category;
+            document.getElementById('item-quantity').value = quantity;
+            document.getElementById('item-status').value = status;
+            
+            document.getElementById('item-modal').style.display = 'block';
+        }
+        
+        // Add a new item
+        function addNewItem() {
+            document.getElementById('modal-title').textContent = 'Add New Item';
+            document.getElementById('item-form').reset();
+            document.getElementById('item-id').value = generateId();
+            
+            document.getElementById('item-modal').style.display = 'block';
+        }
+        
+        // Generate a new unique ID for items
+        function generateId() {
+            return 'INV' + Date.now().toString().slice(-6);
+        }
+        
+        // Save item using Apps Script Web App
+        function saveItem(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('item-id').value;
+            const name = document.getElementById('item-name').value;
+            const category = document.getElementById('item-category').value;
+            const quantity = document.getElementById('item-quantity').value;
+            const status = document.getElementById('item-status').value;
+            
+            showLoading(true);
+            
+            // Prepare the item data
+            const item = {
+                id: id,
+                name: name,
+                category: category,
+                quantity: quantity,
+                status: status
+            };
+            
+            // Determine if this is an update or a new item
+            const isUpdate = id.startsWith('INV'); // Assuming new IDs start with INV
+            
+            // Send to the Apps Script web app
+            fetch(WEBAPP_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: isUpdate ? 'updateItem' : 'addItem',
+                    item: item
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeModal();
+                    loadInventoryData();
+                } else {
+                    showError('Error saving item: ' + data.message);
+                    showLoading(false);
+                }
+            })
+            .catch(error => {
+                showError('Error saving item: ' + error.message);
+                showLoading(false);
+            });
+        }
+        
+        // Close the modal
+        function closeModal() {
+            document.getElementById('item-modal').style.display = 'none';
+        }
+        
+        // Show/hide loading indicator
+        function showLoading(show) {
+            document.getElementById('loading-indicator').style.display = show ? 'block' : 'none';
+            document.getElementById('inventory-table').style.display = show ? 'none' : 'table';
+        }
+        
+        // Show error message
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Filter inventory based on search input
+        function filterInventory() {
+            const searchText = document.getElementById('search').value.toLowerCase();
+            const rows = document.getElementById('inventory-body').getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let shouldShow = false;
+                
+                for (let j = 0; j < cells.length - 1; j++) { // Skip the action column
+                    const cellText = cells[j].textContent.toLowerCase();
+                    if (cellText.includes(searchText)) {
+                        shouldShow = true;
+                        break;
+                    }
+                }
+                
+                row.style.display = shouldShow ? '' : 'none';
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGoogleApi();
+            
+            document.getElementById('add-item').addEventListener('click', addNewItem);
+            document.getElementById('refresh-data').addEventListener('click', loadInventoryData);
+            document.getElementById('item-form').addEventListener('submit', saveItem);
+            document.getElementById('cancel-button').addEventListener('click', closeModal);
+            document.querySelector('.close').addEventListener('click', closeModal);
+            document.getElementById('search').addEventListener('input', filterInventory);
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target === document.getElementById('item-modal')) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
